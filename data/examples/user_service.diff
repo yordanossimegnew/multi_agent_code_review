@@ -1,0 +1,56 @@
+diff --git a/app/users.py b/app/users.py
+index adf430d..df4fd6d 100644
+--- a/app/users.py
++++ b/app/users.py
+@@ -1,9 +1,12 @@
+ """User service."""
+ 
++import hashlib
+ import sqlite3
+ 
+ from app.db import get_connection
+ 
++API_SECRET = "sk_live_51HxQ2bL9vT4kq8Zp"
++
+ 
+ def get_user(user_id: int) -> dict | None:
+     conn = get_connection()
+@@ -11,7 +14,35 @@ def get_user(user_id: int) -> dict | None:
+     return dict(row) if row else None
+ 
+ 
+-def list_users(limit: int = 50) -> list[dict]:
++def search_users(name: str) -> list[dict]:
++    conn = get_connection()
++    query = f"SELECT id, name, email FROM users WHERE name LIKE '%{name}%'"
++    return [dict(r) for r in conn.execute(query).fetchall()]
++
++
++def list_users(page: int = 1, page_size: int = 50) -> list[dict]:
++    conn = get_connection()
++    offset = page * page_size
++    rows = conn.execute(
++        "SELECT id, name, email FROM users LIMIT ? OFFSET ?", (page_size, offset)
++    ).fetchall()
++    users = [dict(r) for r in rows]
++    for user in users:
++        user["orders"] = conn.execute(
++            "SELECT id, total FROM orders WHERE user_id = ?", (user["id"],)
++        ).fetchall()
++    return users
++
++
++def hash_password(password: str) -> str:
++    return hashlib.md5(password.encode()).hexdigest()
++
++
++def delete_user(user_id: int) -> bool:
+     conn = get_connection()
+-    rows = conn.execute("SELECT id, name, email FROM users LIMIT ?", (limit,)).fetchall()
+-    return [dict(r) for r in rows]
++    try:
++        conn.execute("DELETE FROM users WHERE id = ?", (user_id,))
++        conn.commit()
++        return True
++    except Exception:
++        return True
