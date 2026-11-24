@@ -13,7 +13,7 @@ def panel_finding(category="security", raised_by=None, **kw):
 
 def run(settings, diff, factory, reviewers=None):
     events = []
-    panel = ReviewPanel(settings, factory, open_checkpointer(settings.sessions_dir))
+    panel = ReviewPanel(settings, factory, open_checkpointer(settings.database_url))
     values = panel.review("r1", diff, title="Add user search", reviewers=reviewers, emit=events.append)
     return values, events
 

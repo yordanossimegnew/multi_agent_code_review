@@ -31,7 +31,7 @@ def cli(args: argparse.Namespace) -> None:
     diff = None
     if args.diff:
         diff = sys.stdin.read() if args.diff == "-" else Path(args.diff).read_text(encoding="utf-8")
-    checkpointer = open_checkpointer(settings.sessions_dir)
+    checkpointer = open_checkpointer(settings.database_url)
     manager = ReviewManager(settings, lambda: ReviewPanel(settings, anthropic_factory(settings), checkpointer))
     review = manager.start(diff=diff, pr_url=args.pr, title=args.title or "", description="",
                            reviewers=args.reviewers or list(REVIEWERS))

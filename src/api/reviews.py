@@ -6,7 +6,7 @@ import threading
 import time
 import uuid
 from dataclasses import dataclass, field
-from typing import Any, Callable, Iterator
+from typing import Callable, Iterator
 
 import anthropic
 
@@ -79,7 +79,7 @@ class ReviewManager:
         index = start
         while True:
             with review.cond:
-                review.cond.wait_for(lambda: len(review.events) > index or review.finished, timeout=keepalive)
+                review.cond.wait_for(lambda: len(review.events) > index or review.finished, timeout=keepalive)  # noqa: B023 (called before index changes)
                 batch, done = review.events[index:], review.finished
             for event in batch:
                 yield event

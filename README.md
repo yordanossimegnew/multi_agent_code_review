@@ -1,6 +1,6 @@
 # Multi-Agent Code Review
 
-[![tests](https://github.com/yordanossimegnew/multi_agent_code_review/actions/workflows/tests.yml/badge.svg)](https://github.com/yordanossimegnew/multi_agent_code_review/actions/workflows/tests.yml)
+[![tests](https://github.com/yordanossimegnew/multi_agent_code_review/actions/workflows/tests.yml/badge.svg)](https://github.com/yordanossimegnew/multi_agent_code_review/actions/workflows/tests.yml) ![Python 3.12](https://img.shields.io/badge/python-3.12-blue) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 A panel of AI reviewers for pull requests. Paste a diff or a GitHub PR URL. **Four specialist
 agents review it in parallel**: security, correctness, performance and maintainability. A
@@ -18,6 +18,13 @@ Server-Sent Events and a **Streamlit** UI.
 | Live panel | Verdict | Finding with code | Inline diff annotations |
 |---|---|---|---|
 | ![Panel](docs/screenshots/live-panel.png) | ![Verdict](docs/screenshots/verdict.png) | ![Findings](docs/screenshots/findings.png) | ![Inline](docs/screenshots/inline-diff.png) |
+
+## Engineering highlights
+
+- Fan-out/fan-in with LangGraph `Send` and an `operator.add` reducer: four specialists review the diff in parallel.
+- A lead reviewer acts as a judge. It merges duplicates, dismisses false positives with a recorded reason, and picks a verdict.
+- Every finding is checked against the parsed diff. Lines that match are kept, near misses are moved to the nearest changed line, and the rest are flagged as unverified.
+- Native JSON-schema structured output means every agent's response parses.
 
 ## Features
 
@@ -75,7 +82,7 @@ multi-agent-code-review/
 │   │   ├── schemas.py      # Pydantic structured-output schemas
 │   │   ├── verify.py       # checks findings against the real diff + fallback merge
 │   │   ├── state.py        # graph state with reducers (reviews, token usage)
-│   │   └── memory.py       # SQLite checkpointer
+│   │   └── memory.py       # PostgreSQL checkpointer
 │   ├── tools/
 │   │   ├── diff.py         # unified diff parser with new-file line numbers
 │   │   └── github.py       # GitHub PR fetcher (httpx)
@@ -101,7 +108,15 @@ cd multi-agent-code-review
 python -m venv .venv
 # Windows: .venv\Scripts\activate   |   macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env              # then put your ANTHROPIC_API_KEY in .env
+cp .env.example .env              # set ANTHROPIC_API_KEY, DATABASE_URL and TEST_DATABASE_URL
+```
+
+Create the two PostgreSQL databases once (in psql or pgAdmin). LangGraph creates its checkpoint
+tables on first start:
+
+```sql
+CREATE DATABASE code_review;
+CREATE DATABASE code_review_test;   -- used only by pytest
 ```
 
 ## Run the API

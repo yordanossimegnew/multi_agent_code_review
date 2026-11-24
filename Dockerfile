@@ -5,7 +5,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
-RUN useradd --create-home app && mkdir -p /app/data/sessions /app/logs && chown -R app:app /app/data /app/logs
+RUN useradd --create-home app && mkdir -p /app/logs && chown -R app:app /app/data /app/logs
 USER app
 
 EXPOSE 8000

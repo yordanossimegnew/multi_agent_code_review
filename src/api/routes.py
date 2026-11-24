@@ -13,15 +13,14 @@ from ..models import ModelFactory, anthropic_factory
 from ..tools import DiffError, GitHubError, PullRequest, parse_diff, parse_pr_url
 from ..utils.config import Settings, load_settings
 from .reviews import Review, ReviewManager
-from .schemas import (HealthResponse, ReviewCreated, ReviewDetail, ReviewerInfo, ReviewRequest,
-                      ReviewSummary)
+from .schemas import HealthResponse, ReviewCreated, ReviewDetail, ReviewerInfo, ReviewRequest, ReviewSummary
 
 
 def create_app(settings: Settings | None = None, model_factory: ModelFactory | None = None,
                pr_fetcher: Callable[[str], PullRequest] | None = None) -> FastAPI:
     settings = settings or load_settings()
     app = FastAPI(title="Multi-Agent Code Review", version="1.0.0")
-    checkpointer = open_checkpointer(settings.sessions_dir)
+    checkpointer = open_checkpointer(settings.database_url)
 
     def panel_factory() -> ReviewPanel:
         return ReviewPanel(settings, model_factory or anthropic_factory(settings), checkpointer)

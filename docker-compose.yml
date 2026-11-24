@@ -1,11 +1,27 @@
 services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: agent
+      POSTGRES_PASSWORD: agent
+      POSTGRES_DB: code_review
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agent -d code_review"]
+      interval: 2s
+      retries: 20
+
   api:
     build: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://agent:agent@postgres:5432/code_review
     ports:
       - "8000:8000"
     env_file: .env
-    volumes:
-      - ./data/sessions:/app/data/sessions
 
   ui:
     build: .
@@ -16,3 +32,6 @@ services:
       AGENT_API_URL: http://api:8000
     depends_on:
       - api
+
+volumes:
+  pgdata:
