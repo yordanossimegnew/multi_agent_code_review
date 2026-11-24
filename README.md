@@ -1,5 +1,7 @@
 # Multi-Agent Code Review
 
+[![tests](https://github.com/yordanossimegnew/multi_agent_code_review/actions/workflows/tests.yml/badge.svg)](https://github.com/yordanossimegnew/multi_agent_code_review/actions/workflows/tests.yml)
+
 A panel of AI reviewers for pull requests. Paste a diff or a GitHub PR URL. **Four specialist
 agents review it in parallel**: security, correctness, performance and maintainability. A
 **lead reviewer** then verifies their findings, merges duplicates, dismisses false positives and
